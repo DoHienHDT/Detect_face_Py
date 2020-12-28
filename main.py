@@ -1,8 +1,3 @@
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
 
 import cv2
 import numpy as np
@@ -46,7 +41,7 @@ cap = cv2.VideoCapture(0)
 while True:
     success, img = cap.read()
     # img = captureScreen()
-    imgS = cv2.resize(img, (0, 0), None, 0.25, 0.25)
+    imgS = cv2.resize(img, (0, 0), None, 0.5, 0.5)
     imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
 
     facesCurFrame = face_recognition.face_locations(imgS)
@@ -59,14 +54,28 @@ while True:
         matchIndex = np.argmin(faceDis)
 
         if matches[matchIndex]:
+
+            sortName = np.sort(faceDis)
+            medium = sortName[int(sortName.size / 2)]
+
+            print(faceDis[matchIndex], medium, medium - faceDis[matchIndex])
+
             name = classNames[matchIndex].upper()
-            # print(name)
+            # print(faceDis)
+
             y1, x2, y2, x1 = faceLoc
-            y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
+            y1, x2, y2, x1 = y1 * 2, x2 * 2, y2 * 2, x1 * 2
             cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 255, 0), cv2.FILLED)
-            cv2.putText(img, name[:-2], (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
-            # markAttendance(name)
 
+            if medium - faceDis[matchIndex] > 0.2:
+                cv2.putText(img, name[:-2], (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
+            else:
+                cv2.putText(img, "Unknown", (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
+            cv2.putText(img, f'{round(faceDis[matchIndex], 2)}', (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1,
+                        (0, 0, 255), 2)
+            # print("----->" +  f'{round(faceDis[matchIndex], 2)}')
     cv2.imshow('Webcam', img)
     cv2.waitKey(1)
+
+
